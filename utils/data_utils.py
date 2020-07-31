@@ -4,8 +4,6 @@ import sys
 import re
 import glob
 import logging
-import argparse
-import json
 
 from collections import defaultdict
 from typing import List, Tuple
@@ -49,11 +47,12 @@ def get_logger(name: str, level=logging.DEBUG) -> logging.Logger:
 
 LOGGER = get_logger(__name__)
 
-class DATA_UTILS:
-    def __init__(self, data_file_path, save_prefix):
-        self.data_file_path = data_file_path
-        self.save_prefix = save_prefix
 
+class DATA_UTILS:
+    def __init__(self, data_file_path):
+        self.data_file_path = data_file_path
+
+    # pylint: disable=attribute-defined-outside-init
     def get_data(self) -> list:
         """
         This method returns the raster data set of original image for
@@ -69,7 +68,7 @@ class DATA_UTILS:
         data_path = ""
         data_folder = "MTD*.xml"
         for file in glob.iglob(
-                os.path.join(self.data_name, data_folder), recursive=True,
+            os.path.join(self.data_name, data_folder), recursive=True,
         ):
             data_path = file
 
@@ -104,7 +103,6 @@ class DATA_UTILS:
         tmymax = int((tmymax + 1) / 6) * 6 - 1
         area = (tmxmax - tmxmin + 1) * (tmymax - tmymin + 1)
         return tmxmin, tmymin, tmxmax, tmymax, area
-
 
     # pylint: disable-msg=too-many-locals
     def to_xy(self, lon: float, lat: float, data) -> Tuple:
@@ -149,7 +147,7 @@ class DATA_UTILS:
         return utm
 
     # pylint: disable-msg=too-many-locals
-    def area_of_interest(self, data, roi_x_y, clip_to_aoi=True) -> Tuple:
+    def area_of_interest(self, data, clip_to_aoi=True) -> Tuple:
         """
         This method returns the coordinates that define the desired area of interest.
         """
@@ -238,11 +236,10 @@ class DATA_UTILS:
                     validated_descriptions[name] = desc
         return validated_bands, validated_indices, validated_descriptions
 
-
     # pylint: disable-msg=too-many-arguments
     @staticmethod
     def data_final(
-            data, term: List, x_mi: int, y_mi: int, x_ma: int, y_ma: int, n_res
+        data, term: List, x_mi: int, y_mi: int, x_ma: int, y_ma: int, n_res
     ) -> np.ndarray:
         """
         This method takes the raster file at a specific
@@ -281,8 +278,7 @@ class DATA_UTILS:
         mi, ma = np.percentile(percentile_data, (1, 99))
         band_data = np.clip(data, mi, ma)
         band_data = (band_data - mi) / (ma - mi)
-        imageio.imsave(save_prefix + name + ".png", band_data
-        )
+        imageio.imsave(save_prefix + name + ".png", band_data)
 
     @staticmethod
     def check_size(dims):

@@ -10,7 +10,6 @@ import numpy as np
 from utils.data_utils import DATA_UTILS, get_logger
 
 
-
 sys.path.append("../")
 from utils.patches import (
     downPixelAggr,
@@ -21,6 +20,7 @@ from utils.patches import (
 )
 
 LOGGER = get_logger(__name__)
+
 
 class readS2fromFile(DATA_UTILS):
     def __init__(
@@ -44,14 +44,16 @@ class readS2fromFile(DATA_UTILS):
         self.test_data = test_data
         self.train_data = train_data
 
-        super().__init__(data_file_path, save_prefix)
+        super().__init__(data_file_path)
 
     def get_original_image(self) -> Tuple:
 
         data_list = self.get_data()
         for dsdesc in data_list:
             if "10m" in dsdesc:
-                xmin, ymin, xmax, ymax, interest_area = self.area_of_interest(dsdesc, self.clip_to_aoi)
+                xmin, ymin, xmax, ymax, interest_area = self.area_of_interest(
+                    dsdesc, self.clip_to_aoi
+                )
                 LOGGER.info("Selected pixel region:")
                 LOGGER.info("xmin = %s", xmin)
                 LOGGER.info("ymin = %s", ymin)
@@ -193,7 +195,11 @@ class readS2fromFile(DATA_UTILS):
             np.save(
                 out_per_image + "no_tiling/" + "data20_gt", data20.astype(np.float32)
             )
-            self.save_band(data10_lr[:, :, 0:3], "/test/" + self.data_name + "/RGB")
+            self.save_band(
+                self.save_prefix,
+                data10_lr[:, :, 0:3],
+                "/test/" + self.data_name + "/RGB",
+            )
         np.save(out_per_image + "no_tiling/" + "data10", data10_lr.astype(np.float32))
         np.save(out_per_image + "no_tiling/" + "data20", data20_lr.astype(np.float32))
         return out_per_image
@@ -202,8 +208,16 @@ class readS2fromFile(DATA_UTILS):
         # elif write_images
         data10_lr, data20_lr = self.get_downsampled_images(data10, data20, data60)
         LOGGER.info("Creating RGB images...")
-        self.save_band(data10_lr[:, :, 0:3], "/raw/rgbs/" + self.data_name + "RGB")
-        self.save_band(data20_lr[:, :, 0:3], "/raw/rgbs/" + self.data_name + "RGB20")
+        self.save_band(
+            self.save_prefix,
+            data10_lr[:, :, 0:3],
+            "/raw/rgbs/" + self.data_name + "RGB",
+        )
+        self.save_band(
+            self.save_prefix,
+            data20_lr[:, :, 0:3],
+            "/raw/rgbs/" + self.data_name + "RGB20",
+        )
 
     def saving_true_data(self, data10, data20, data60):
         # elif true_data:
