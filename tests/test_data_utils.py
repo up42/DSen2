@@ -1,14 +1,19 @@
 """
 This module include multiple test cases to check the performance of the s2_tiles_supres script.
 """
+import os
 from pathlib import Path
 import tempfile
+import logging
 
+import numpy as np
 import rasterio
 from rasterio.transform import from_origin
 from blockutils.syntheticimage import SyntheticImage
 
-from context import DATA_UTILS
+from context import DATA_UTILS, get_logger
+
+LOGGER = get_logger(__name__)
 
 
 def test_get_max_min():
@@ -244,3 +249,25 @@ def test_data_final():
 
     d_final = DATA_UTILS.data_final(test_img, valid_indices, 0, 0, 5, 5, 1)
     assert d_final.shape == (6, 6, 4)
+
+
+def test_save_band():
+    save_prefix = "/tmp/"
+    name = "a"
+
+    array = np.zeros([100, 200, 3], dtype=np.uint8)
+    array[:, :100] = [255, 128, 0]  # Orange left side
+    array[:, 100:] = [0, 0, 255]  # Blue right side
+
+    DATA_UTILS.save_band(save_prefix, array, name)
+    assert os.path.isfile(save_prefix + name + ".png")
+
+
+def test_check_size(caplog):
+    dim_exm = 180, 180, 199, 199
+    with caplog.at_level(logging.DEBUG):
+        DATA_UTILS.check_size(dim_exm)
+    assert (
+        "AOI too small. Try again with a larger AOI (minimum pixel width or heigh of 192)"
+        in caplog.text
+    )
