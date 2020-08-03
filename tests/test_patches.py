@@ -47,32 +47,36 @@ def test_get_test_patches60(dset_10, dset_20, dset_60):
     assert r[2].shape == (4356, 3, 192, 192)
 
 
+@pytest.mark.skip(reason="too long test")
 def save_test_patches(dset_10, dset_20):
     with tempfile.TemporaryDirectory() as tmpdir:
-        patches.save_test_patches(dset_10, dset_20, tmpdir, 128, 8)
+        patches.save_test_patches(dset_10, dset_20, tmpdir + "/", 128, 8)
         f = Path(tmpdir).glob("*/**")
         assert len(list(f)) == 2
 
 
+@pytest.mark.skip(reason="too long test")
 def save_test_patches60(dset_10, dset_20, dset_60):
     with tempfile.TemporaryDirectory() as tmpdir:
-        patches.save_test_patches60(dset_10, dset_20, dset_60, tmpdir, 192, 12)
+        patches.save_test_patches60(dset_10, dset_20, dset_60, tmpdir + "/", 192, 12)
         f = Path(tmpdir).glob("*/**")
         assert len(list(f)) == 3
 
 
+@pytest.mark.skip(reason="too long test")
 def test_save_random_patches(dset_10, dset_20, scale_20):
     with tempfile.TemporaryDirectory() as tmpdir:
         patches.save_random_patches(
             dset_20,
             patches.downPixelAggr(dset_10, scale_20),
             patches.downPixelAggr(dset_20, scale_20),
-            tmpdir,
+            tmpdir + "/",
         )
         f = Path(tmpdir).glob("*/**")
         assert len(list(f)) == 2
 
 
+@pytest.mark.skip(reason="too long test")
 def test_save_random_patches60(dset_10, dset_20, dset_60, scale_60):
     with tempfile.TemporaryDirectory() as tmpdir:
         patches.save_random_patches60(
@@ -80,7 +84,7 @@ def test_save_random_patches60(dset_10, dset_20, dset_60, scale_60):
             patches.downPixelAggr(dset_10, scale_60),
             patches.downPixelAggr(dset_20, scale_60),
             patches.downPixelAggr(dset_60, scale_60),
-            tmpdir,
+            tmpdir + "/",
         )
         f = Path(tmpdir).glob("*/**")
         assert len(list(f)) == 3
@@ -88,13 +92,15 @@ def test_save_random_patches60(dset_10, dset_20, dset_60, scale_60):
 
 def test_downPixelAggr(dset_10, scale_20):
     r = patches.downPixelAggr(dset_10, scale_20)
-    assert r.shape == (1, 1, 1)
+    assert r.shape == (5490, 5490, 4)
 
 
 def test_recompose_images(dset_10, dset_20):
     p = patches.get_test_patches(dset_10, dset_20, 128, 8)
-    r_p = patches.recompose_images(p[0], 8)
+    r_p = patches.recompose_images(p[0], 8, dset_10.shape)
     assert dset_10.shape == r_p.shape
 
-def test_interp_patches(dset20, dset_10):
-    patches.interp_patches(dset20, dset10.shape)
+
+def test_interp_patches(dset_20, dset_10):
+    r = patches.interp_patches(dset_20, dset_10.shape)
+    assert r
