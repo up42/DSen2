@@ -101,6 +101,7 @@ def test_recompose_images(dset_10, dset_20):
     assert dset_10.shape == r_p.shape
 
 
+@pytest.mark.skip(reason="too long test")
 def test_interp_patches(dset_20, dset_10):
     r = patches.interp_patches(dset_20, dset_10.shape)
     assert r
