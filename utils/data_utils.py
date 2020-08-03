@@ -270,7 +270,7 @@ class DATA_UTILS:
         return d_final
 
     @staticmethod
-    def save_band(save_prefix, data, name, percentile_data=None):
+    def save_band(save_prefix: str, data: np.ndarray, name: str, percentile_data=None):
         # The percentile_data argument is used to plot superresolved and original data
         # with a comparable black/white scale
         if percentile_data is None:
@@ -291,4 +291,4 @@ class DATA_UTILS:
             LOGGER.error(
                 "AOI too small. Try again with a larger AOI (minimum pixel width or heigh of 192)"
             )
-            sys.exit(1)
+            # sys.exit(1)
