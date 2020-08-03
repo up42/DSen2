@@ -147,7 +147,7 @@ class DATA_UTILS:
         return utm
 
     # pylint: disable-msg=too-many-locals
-    def area_of_interest(self, data, clip_to_aoi=True) -> Tuple:
+    def area_of_interest(self, data, clip_to_aoi) -> Tuple:
         """
         This method returns the coordinates that define the desired area of interest.
         """
