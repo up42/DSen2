@@ -386,7 +386,7 @@ def save_random_patches60(dset_60gt, dset_10, dset_20, dset_60, file, NR_CROP=50
 
 
 def splitTrainVal(train_path, train, label):
-    # val_ind is numpy array 
+    # val_ind is numpy array
     # pylint: disable=invalid-unary-operand-type
     try:
         val_ind = np.load(train_path + "val_index.npy")
