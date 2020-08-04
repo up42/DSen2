@@ -25,89 +25,78 @@ def interp_patches(image_20, image_10_shape):
     return data20_interp
 
 
-def get_test_patches(dset_10, dset_20, patchSize=128, border=4, interp=True):
+def get_patches(
+    dset: np.ndarray,
+    patch_size: int,
+    border: int,
+    patches_along_i: int,
+    patches_along_j: int,
+) -> np.ndarray:
+    n_bands = dset.shape[2]
 
-    PATCH_SIZE_HR = (patchSize, patchSize)
-    PATCH_SIZE_LR = [p // 2 for p in PATCH_SIZE_HR]
-    BORDER_HR = border
-    BORDER_LR = BORDER_HR // 2
+    # array index
+    nr_patches = (patches_along_i + 1) * (patches_along_j + 1)
+    range_i = np.arange(0, patches_along_i) * (patch_size - 2 * border)
+    range_j = np.arange(0, patches_along_j) * (patch_size - 2 * border)
 
-    # Mirror the data at the borders to have the same dimensions as the input
-    dset_10 = np.pad(
-        dset_10,
-        ((BORDER_HR, BORDER_HR), (BORDER_HR, BORDER_HR), (0, 0)),
-        mode="symmetric",
-    )
-    dset_20 = np.pad(
-        dset_20,
-        ((BORDER_LR, BORDER_LR), (BORDER_LR, BORDER_LR), (0, 0)),
-        mode="symmetric",
-    )
-
-    BANDS10 = dset_10.shape[2]
-    BANDS20 = dset_20.shape[2]
-    patchesAlongi = (dset_20.shape[0] - 2 * BORDER_LR) // (
-        PATCH_SIZE_LR[0] - 2 * BORDER_LR
-    )
-    patchesAlongj = (dset_20.shape[1] - 2 * BORDER_LR) // (
-        PATCH_SIZE_LR[1] - 2 * BORDER_LR
+    patches = np.zeros((nr_patches, n_bands) + (patch_size, patch_size)).astype(
+        np.float32
     )
 
-    nr_patches = (patchesAlongi + 1) * (patchesAlongj + 1)
+    # if height and width are divisible by patch size - border * 2,
+    # add one extra patch at the end of the image
+    if np.mod(dset.shape[0] - 2 * border, patch_size - 2 * border) != 0:
+        range_i = np.append(range_i, (dset.shape[0] - patch_size))
+    if np.mod(dset.shape[1] - 2 * border, patch_size - 2 * border) != 0:
+        range_j = np.append(range_j, (dset.shape[1] - patch_size))
 
-    image_20 = np.zeros((nr_patches, BANDS20) + tuple(PATCH_SIZE_LR)).astype(np.float32)
-    image_10 = np.zeros((nr_patches, BANDS10) + PATCH_SIZE_HR).astype(np.float32)
-
-    # print(label_20.shape)
-    # print(image_20.shape)
-    # print(image_10.shape)
-
-    range_i = np.arange(
-        0, (dset_20.shape[0] - 2 * BORDER_LR) // (PATCH_SIZE_LR[0] - 2 * BORDER_LR)
-    ) * (PATCH_SIZE_LR[0] - 2 * BORDER_LR)
-    range_j = np.arange(
-        0, (dset_20.shape[1] - 2 * BORDER_LR) // (PATCH_SIZE_LR[1] - 2 * BORDER_LR)
-    ) * (PATCH_SIZE_LR[1] - 2 * BORDER_LR)
-
-    if not (
-        np.mod(dset_20.shape[0] - 2 * BORDER_LR, PATCH_SIZE_LR[0] - 2 * BORDER_LR) == 0
-    ):
-        range_i = np.append(range_i, (dset_20.shape[0] - PATCH_SIZE_LR[0]))
-    if not (
-        np.mod(dset_20.shape[1] - 2 * BORDER_LR, PATCH_SIZE_LR[1] - 2 * BORDER_LR) == 0
-    ):
-        range_j = np.append(range_j, (dset_20.shape[1] - PATCH_SIZE_LR[1]))
-
-    # print(range_i)
-    # print(range_j)
-
-    pCount = 0
+    patch_count = 0
     for ii in range_i.astype(int):
         for jj in range_j.astype(int):
             upper_left_i = ii
             upper_left_j = jj
-            crop_point_lr = [
+            crop_point = [
                 upper_left_i,
                 upper_left_j,
-                upper_left_i + PATCH_SIZE_LR[0],
-                upper_left_j + PATCH_SIZE_LR[1],
+                upper_left_i + patch_size,
+                upper_left_j + patch_size,
             ]
-            crop_point_hr = [p * 2 for p in crop_point_lr]
-            image_20[pCount] = np.rollaxis(
-                dset_20[
-                    crop_point_lr[0] : crop_point_lr[2],
-                    crop_point_lr[1] : crop_point_lr[3],
-                ],
-                2,
+            # make shape (p, c, w, h)
+            patches[patch_count] = np.rollaxis(
+                dset[crop_point[0] : crop_point[2], crop_point[1] : crop_point[3],], 2,
             )
-            image_10[pCount] = np.rollaxis(
-                dset_10[
-                    crop_point_hr[0] : crop_point_hr[2],
-                    crop_point_hr[1] : crop_point_hr[3],
-                ],
-                2,
-            )
-            pCount += 1
+            patch_count += 1
+
+    return patches
+
+
+def get_test_patches(dset_10, dset_20, patchSize=128, border=4, interp=True):
+    """Used for inference. Creates patches of specifric size in the whole image"""
+
+    patch_size_lr = patchSize // 2
+    border_lr = border // 2
+
+    # Mirror the data at the borders to have the same dimensions as the input
+    dset_10 = np.pad(
+        dset_10, ((border, border), (border, border), (0, 0)), mode="symmetric",
+    )
+    dset_20 = np.pad(
+        dset_20,
+        ((border_lr, border_lr), (border_lr, border_lr), (0, 0)),
+        mode="symmetric",
+    )
+
+    patchesAlongi = (dset_20.shape[0] - 2 * border_lr) // (
+        patch_size_lr - 2 * border_lr
+    )
+    patchesAlongj = (dset_20.shape[1] - 2 * border_lr) // (
+        patch_size_lr - 2 * border_lr
+    )
+
+    image_10 = get_patches(dset_10, patchSize, border, patchesAlongi, patchesAlongj)
+    image_20 = get_patches(
+        dset_20, patch_size_lr, border_lr, patchesAlongi, patchesAlongj
+    )
 
     image_10_shape = image_10.shape
 
