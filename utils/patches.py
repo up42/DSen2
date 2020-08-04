@@ -54,7 +54,6 @@ def get_test_patches(dset_10, dset_20, patchSize=128, border=4, interp=True):
 
     nr_patches = (patchesAlongi + 1) * (patchesAlongj + 1)
 
-    label_20 = np.zeros((nr_patches, BANDS20) + PATCH_SIZE_HR).astype(np.float32)
     image_20 = np.zeros((nr_patches, BANDS20) + tuple(PATCH_SIZE_LR)).astype(np.float32)
     image_10 = np.zeros((nr_patches, BANDS10) + PATCH_SIZE_HR).astype(np.float32)
 
@@ -277,7 +276,7 @@ def save_random_patches(dset_20gt, dset_10, dset_20, file, NR_CROP=8000):
     # print(image_10.shape)
 
     i = 0
-    for crop in range(0, NR_CROP):
+    for _ in range(0, NR_CROP):
         # while True:
         upper_left_x = randrange(0, dset_20.shape[0] - PATCH_SIZE_LR[0])
         upper_left_y = randrange(0, dset_20.shape[1] - PATCH_SIZE_LR[1])
@@ -339,7 +338,7 @@ def save_random_patches60(dset_60gt, dset_10, dset_20, dset_60, file, NR_CROP=50
     print(image_60.shape)
 
     i = 0
-    for crop in range(0, NR_CROP):
+    for _ in range(0, NR_CROP):
         # while True:
         upper_left_x = randrange(0, dset_60.shape[0] - PATCH_SIZE_60[0])
         upper_left_y = randrange(0, dset_60.shape[1] - PATCH_SIZE_60[1])
