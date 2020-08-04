@@ -12,6 +12,7 @@ from scipy.ndimage.filters import gaussian_filter
 
 
 def interp_patches(image_20, image_10_shape):
+    """Upsample patches to shape of higher resolution"""
     data20_interp = np.zeros((image_20.shape[0:2] + image_10_shape[2:4])).astype(
         np.float32
     )
