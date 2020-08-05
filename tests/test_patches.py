@@ -4,7 +4,7 @@ import pytest
 
 import numpy as np
 
-from utils import patches
+from context import patches
 
 
 @pytest.fixture()
