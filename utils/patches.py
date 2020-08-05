@@ -5,7 +5,7 @@ import json
 from math import ceil
 from random import randrange
 
-from typing import List
+from typing import Tuple, List
 
 import numpy as np
 from skimage.transform import resize
@@ -13,7 +13,9 @@ import skimage.measure
 from scipy.ndimage.filters import gaussian_filter
 
 
-def interp_patches(image_20, image_10_shape):
+def interp_patches(
+    image_20: np.ndarray, image_10_shape: Tuple[int, int, int, int]
+) -> np.ndarray:
     """Upsample patches to shape of higher resolution"""
     data20_interp = np.zeros((image_20.shape[0:2] + image_10_shape[2:4])).astype(
         np.float32
@@ -75,8 +77,14 @@ def get_patches(
     return patches
 
 
-def get_test_patches(dset_10, dset_20, patchSize=128, border=4, interp=True):
-    """Used for inference. Creates patches of specifric size in the whole image"""
+def get_test_patches(
+    dset_10: np.ndarray,
+    dset_20: np.ndarray,
+    patchSize: int = 128,
+    border: int = 4,
+    interp: bool = True,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Used for inference. Creates patches of specific size in the whole image (10m and 20m)"""
 
     patch_size_lr = patchSize // 2
     border_lr = border // 2
@@ -113,8 +121,14 @@ def get_test_patches(dset_10, dset_20, patchSize=128, border=4, interp=True):
 
 
 def get_test_patches60(
-    dset_10, dset_20, dset_60, patchSize=192, border=12, interp=True
-):
+    dset_10: np.ndarray,
+    dset_20: np.ndarray,
+    dset_60: np.ndarray,
+    patchSize: int = 192,
+    border: int = 12,
+    interp: bool = True,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Used for inference. Creates patches of specific size in the whole image (10m, 20m and 60m)"""
 
     patch_size_20 = patchSize // 2
     patch_size_60 = patchSize // 6
@@ -164,7 +178,15 @@ def get_test_patches60(
     return image_10, data20_interp, data60_interp
 
 
-def save_test_patches(dset_10, dset_20, file, patchSize=128, border=4, interp=True):
+def save_test_patches(
+    dset_10: np.ndarray,
+    dset_20: np.ndarray,
+    file: str,
+    patchSize: int = 128,
+    border: int = 4,
+    interp: bool = True,
+):
+    """Save patches for inference into files (10 and 20m)"""
     image_10, data20_interp = get_test_patches(
         dset_10, dset_20, patchSize=patchSize, border=border, interp=interp
     )
@@ -177,9 +199,15 @@ def save_test_patches(dset_10, dset_20, file, patchSize=128, border=4, interp=Tr
 
 
 def save_test_patches60(
-    dset_10, dset_20, dset_60, file, patchSize=192, border=12, interp=True
+    dset_10: np.ndarray,
+    dset_20: np.ndarray,
+    dset_60: np.ndarray,
+    file: str,
+    patchSize: int = 192,
+    border: int = 12,
+    interp: bool = True,
 ):
-
+    """Save patches for inference into files (10m, 20m and 60m)"""
     image_10, data20_interp, data60_interp = get_test_patches60(
         dset_10, dset_20, dset_60, patchSize=patchSize, border=border, interp=interp
     )
@@ -194,6 +222,8 @@ def save_test_patches60(
 def get_crop_window(
     upper_left_x: int, upper_left_y: int, patch_size: int, scale: int = 1
 ) -> List[int]:
+    """From a x,y coordinate pair and patch size return a list ofpixel coordinates
+    defining a window in an array. Optionally pass a scale factor."""
     crop_window = [
         upper_left_x,
         upper_left_y,
@@ -207,6 +237,8 @@ def get_crop_window(
 def crop_array_to_window(
     array: np.ndarray, crop_window: List[int], rollaxis: bool = True
 ) -> np.ndarray:
+    """Return a subset of a numpy array. Rollaxis optional from channels last
+    to channels first and vice versa. """
     cropped_array = array[
         crop_window[0] : crop_window[2], crop_window[1] : crop_window[3]
     ]
@@ -216,7 +248,13 @@ def crop_array_to_window(
         return cropped_array
 
 
-def get_random_patches(dset_20gt, dset_10, dset_20, nr_patches):
+def get_random_patches(
+    dset_20gt: np.ndarray,
+    dset_10: np.ndarray,
+    dset_20: np.ndarray,
+    nr_patches: int = 8000,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Returns a set number of patches randomly select from a 10m and 20m resolution."""
     patch_size = 16
 
     BANDS10 = dset_10.shape[2]
@@ -257,7 +295,15 @@ def get_random_patches(dset_20gt, dset_10, dset_20, nr_patches):
     return image_10, label_20, image_20
 
 
-def get_random_patches60(dset_60gt, dset_10, dset_20, dset_60, nr_patches):
+def get_random_patches60(
+    dset_60gt: np.ndarray,
+    dset_10: np.ndarray,
+    dset_20: np.ndarray,
+    dset_60: np.ndarray,
+    nr_patches: int = 500,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Returns a set number of patches randomly select from a 10m, 20m and 60m resolution."""
+
     patch_size = 16
 
     BANDS10 = dset_10.shape[2]
@@ -306,7 +352,14 @@ def get_random_patches60(dset_60gt, dset_10, dset_20, dset_60, nr_patches):
     return image_10, label_60, image_20, image_60
 
 
-def save_random_patches(dset_20gt, dset_10, dset_20, file, NR_CROP=8000):
+def save_random_patches(
+    dset_20gt: np.ndarray,
+    dset_10: np.ndarray,
+    dset_20: np.ndarray,
+    file: str,
+    NR_CROP: int = 8000,
+):
+    """Save patches into file for training (10 and 20m)"""
     image_10, label_20, image_20 = get_random_patches(
         dset_20gt, dset_10, dset_20, NR_CROP
     )
@@ -320,7 +373,15 @@ def save_random_patches(dset_20gt, dset_10, dset_20, file, NR_CROP=8000):
     print("Done!")
 
 
-def save_random_patches60(dset_60gt, dset_10, dset_20, dset_60, file, NR_CROP=500):
+def save_random_patches60(
+    dset_60gt: np.ndarray,
+    dset_10: np.ndarray,
+    dset_20: np.ndarray,
+    dset_60: np.ndarray,
+    file: str,
+    NR_CROP: int = 500,
+):
+    """Save patches into file for training (10, 20m and 60m)"""
 
     image_10, label_60, image_20, image_60 = get_random_patches60(
         dset_60gt, dset_10, dset_20, dset_60, NR_CROP
