@@ -63,6 +63,28 @@ def save_test_patches60(dset_10, dset_20, dset_60):
         assert len(list(f)) == 3
 
 
+def test_get_random_patches(dset_10, dset_20, scale_20):
+    data10_lr = patches.downPixelAggr(dset_10, SCALE=scale_20)
+    data20_lr = patches.downPixelAggr(dset_20, SCALE=scale_20)
+    r = patches.get_random_patches(dset_20, data10_lr, data20_lr, 8000)
+    assert len(r) == 3
+    assert r[0].shape == (8000, 4, 32, 32)
+    assert r[1].shape == (8000, 5, 32, 32)
+    assert r[2].shape == (8000, 5, 32, 32)
+
+
+def test_get_random_patches60(dset_10, dset_20, dset_60, scale_60):
+    data10_lr = patches.downPixelAggr(dset_10, SCALE=scale_60)
+    data20_lr = patches.downPixelAggr(dset_20, SCALE=scale_60)
+    data60_lr = patches.downPixelAggr(dset_60, SCALE=scale_60)
+    r = patches.get_random_patches60(dset_60, data10_lr, data20_lr, data60_lr, 8000)
+    assert len(r) == 4
+    assert r[0].shape == (8000, 4, 96, 96)
+    assert r[1].shape == (8000, 3, 96, 96)
+    assert r[2].shape == (8000, 5, 96, 96)
+    assert r[3].shape == (8000, 3, 96, 96)
+
+
 @pytest.mark.skip(reason="too long test")
 def test_save_random_patches(dset_10, dset_20, scale_20):
     with tempfile.TemporaryDirectory() as tmpdir:

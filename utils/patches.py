@@ -186,23 +186,22 @@ def save_test_patches60(
     print("Done!")
 
 
-def save_random_patches(dset_20gt, dset_10, dset_20, file, NR_CROP=8000):
-
+def get_random_patches(dset_20gt, dset_10, dset_20, nr_patches):
     PATCH_SIZE_HR = (32, 32)
     PATCH_SIZE_LR = (16, 16)
 
     BANDS10 = dset_10.shape[2]
     BANDS20 = dset_20.shape[2]
-    label_20 = np.zeros((NR_CROP, BANDS20) + PATCH_SIZE_HR).astype(np.float32)
-    image_20 = np.zeros((NR_CROP, BANDS20) + PATCH_SIZE_LR).astype(np.float32)
-    image_10 = np.zeros((NR_CROP, BANDS10) + PATCH_SIZE_HR).astype(np.float32)
+    label_20 = np.zeros((nr_patches, BANDS20) + PATCH_SIZE_HR).astype(np.float32)
+    image_20 = np.zeros((nr_patches, BANDS20) + PATCH_SIZE_LR).astype(np.float32)
+    image_10 = np.zeros((nr_patches, BANDS10) + PATCH_SIZE_HR).astype(np.float32)
 
     # print(label_20.shape)
     # print(image_20.shape)
     # print(image_10.shape)
 
     i = 0
-    for _ in range(0, NR_CROP):
+    for _ in range(0, nr_patches):
         # while True:
         upper_left_x = randrange(0, dset_20.shape[0] - PATCH_SIZE_LR[0])
         upper_left_y = randrange(0, dset_20.shape[1] - PATCH_SIZE_LR[1])
@@ -232,20 +231,13 @@ def save_random_patches(dset_20gt, dset_10, dset_20, file, NR_CROP=8000):
             2,
         )
         i += 1
-    np.save(file + "data10", image_10)
-    image_10_shape = image_10.shape
-    del image_10
-    np.save(file + "data20_gt", label_20)
-    del label_20
 
-    data20_interp = interp_patches(image_20, image_10_shape)
-    np.save(file + "data20", data20_interp)
+    image_20 = interp_patches(image_20, image_10.shape)
 
-    print("Done!")
+    return image_10, label_20, image_20
 
 
-def save_random_patches60(dset_60gt, dset_10, dset_20, dset_60, file, NR_CROP=500):
-
+def get_random_patches60(dset_60gt, dset_10, dset_20, dset_60, nr_patches):
     PATCH_SIZE_10 = (96, 96)
     PATCH_SIZE_20 = (48, 48)
     PATCH_SIZE_60 = (16, 16)
@@ -253,10 +245,10 @@ def save_random_patches60(dset_60gt, dset_10, dset_20, dset_60, file, NR_CROP=50
     BANDS10 = dset_10.shape[2]
     BANDS20 = dset_20.shape[2]
     BANDS60 = dset_60.shape[2]
-    label_60 = np.zeros((NR_CROP, BANDS60) + PATCH_SIZE_10).astype(np.float32)
-    image_10 = np.zeros((NR_CROP, BANDS10) + PATCH_SIZE_10).astype(np.float32)
-    image_20 = np.zeros((NR_CROP, BANDS20) + PATCH_SIZE_20).astype(np.float32)
-    image_60 = np.zeros((NR_CROP, BANDS60) + PATCH_SIZE_60).astype(np.float32)
+    label_60 = np.zeros((nr_patches, BANDS60) + PATCH_SIZE_10).astype(np.float32)
+    image_10 = np.zeros((nr_patches, BANDS10) + PATCH_SIZE_10).astype(np.float32)
+    image_20 = np.zeros((nr_patches, BANDS20) + PATCH_SIZE_20).astype(np.float32)
+    image_60 = np.zeros((nr_patches, BANDS60) + PATCH_SIZE_60).astype(np.float32)
 
     print(label_60.shape)
     print(image_10.shape)
@@ -264,7 +256,7 @@ def save_random_patches60(dset_60gt, dset_10, dset_20, dset_60, file, NR_CROP=50
     print(image_60.shape)
 
     i = 0
-    for _ in range(0, NR_CROP):
+    for _ in range(0, nr_patches):
         # while True:
         upper_left_x = randrange(0, dset_60.shape[0] - PATCH_SIZE_60[0])
         upper_left_y = randrange(0, dset_60.shape[1] - PATCH_SIZE_60[1])
@@ -305,18 +297,39 @@ def save_random_patches60(dset_60gt, dset_10, dset_20, dset_60, file, NR_CROP=50
             2,
         )
         i += 1
+
+    image_20 = interp_patches(image_20, image_10.shape)
+    image_60 = interp_patches(image_60, image_10.shape)
+    return image_10, label_60, image_20, image_60
+
+
+def save_random_patches(dset_20gt, dset_10, dset_20, file, NR_CROP=8000):
+    image_10, label_20, image_20 = get_random_patches(
+        dset_20gt, dset_10, dset_20, NR_CROP
+    )
+
     np.save(file + "data10", image_10)
-    image_10_shape = image_10.shape
+    del image_10
+    np.save(file + "data20_gt", label_20)
+    del label_20
+    np.save(file + "data20", image_20)
+    print("Done!")
+
+
+def save_random_patches60(dset_60gt, dset_10, dset_20, dset_60, file, NR_CROP=500):
+
+    image_10, label_60, image_20, image_60 = get_random_patches60(
+        dset_60gt, dset_10, dset_20, dset_60, NR_CROP
+    )
+    np.save(file + "data10", image_10)
     del image_10
     np.save(file + "data60_gt", label_60)
     del label_60
 
-    data20_interp = interp_patches(image_20, image_10_shape)
-    np.save(file + "data20", data20_interp)
+    np.save(file + "data20", image_20)
     del data20_interp
 
-    data60_interp = interp_patches(image_60, image_10_shape)
-    np.save(file + "data60", data60_interp)
+    np.save(file + "data60", image_60)
 
     print("Done!")
 
