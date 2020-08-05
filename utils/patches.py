@@ -313,6 +313,7 @@ def save_random_patches(dset_20gt, dset_10, dset_20, file, NR_CROP=8000):
     np.save(file + "data20_gt", label_20)
     del label_20
     np.save(file + "data20", image_20)
+    del image_20
     print("Done!")
 
 
@@ -327,9 +328,10 @@ def save_random_patches60(dset_60gt, dset_10, dset_20, dset_60, file, NR_CROP=50
     del label_60
 
     np.save(file + "data20", image_20)
-    del data20_interp
+    del image_20
 
     np.save(file + "data60", image_60)
+    del image_60
 
     print("Done!")
 
