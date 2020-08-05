@@ -64,7 +64,11 @@ def get_patches(
                 upper_left_j + patch_size,
             ]
             # make shape (p, c, w, h)
-            patches[patch_count] = crop_array_to_window(dset, get_crop_window(upper_left_i, upper_left_j, patch_size, 1), rollaxis=True)
+            patches[patch_count] = crop_array_to_window(
+                dset,
+                get_crop_window(upper_left_i, upper_left_j, patch_size, 1),
+                rollaxis=True,
+            )
             patch_count += 1
 
     assert patch_count == nr_patches == patches.shape[0]
@@ -213,33 +217,38 @@ def crop_array_to_window(
 
 
 def get_random_patches(dset_20gt, dset_10, dset_20, nr_patches):
-    PATCH_SIZE_HR = (32, 32)
-    PATCH_SIZE_LR = (16, 16)
+    patch_size = 16
 
     BANDS10 = dset_10.shape[2]
     BANDS20 = dset_20.shape[2]
-    label_20 = np.zeros((nr_patches, BANDS20) + PATCH_SIZE_HR).astype(np.float32)
-    image_20 = np.zeros((nr_patches, BANDS20) + PATCH_SIZE_LR).astype(np.float32)
-    image_10 = np.zeros((nr_patches, BANDS10) + PATCH_SIZE_HR).astype(np.float32)
+    label_20 = np.zeros(
+        (nr_patches, BANDS20) + (patch_size * 2, patch_size * 2)
+    ).astype(np.float32)
+    image_20 = np.zeros((nr_patches, BANDS20) + (patch_size, patch_size)).astype(
+        np.float32
+    )
+    image_10 = np.zeros(
+        (nr_patches, BANDS10) + (patch_size * 2, patch_size * 2)
+    ).astype(np.float32)
 
     for i in range(0, nr_patches):
         # while True:
-        upper_left_x = randrange(0, dset_20.shape[0] - PATCH_SIZE_LR[0])
-        upper_left_y = randrange(0, dset_20.shape[1] - PATCH_SIZE_LR[1])
+        upper_left_x = randrange(0, dset_20.shape[0] - patch_size)
+        upper_left_y = randrange(0, dset_20.shape[1] - patch_size)
 
         label_20[i] = crop_array_to_window(
             dset_20gt,
-            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_LR[0], 2),
+            get_crop_window(upper_left_x, upper_left_y, patch_size, 2),
             rollaxis=True,
         )
         image_20[i] = crop_array_to_window(
             dset_20,
-            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_LR[0]),
+            get_crop_window(upper_left_x, upper_left_y, patch_size),
             rollaxis=True,
         )
         image_10[i] = crop_array_to_window(
             dset_10,
-            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_LR[0], 2),
+            get_crop_window(upper_left_x, upper_left_y, patch_size, 2),
             rollaxis=True,
         )
 
@@ -249,40 +258,46 @@ def get_random_patches(dset_20gt, dset_10, dset_20, nr_patches):
 
 
 def get_random_patches60(dset_60gt, dset_10, dset_20, dset_60, nr_patches):
-    PATCH_SIZE_10 = (96, 96)
-    PATCH_SIZE_20 = (48, 48)
-    PATCH_SIZE_60 = (16, 16)
+    patch_size = 16
 
     BANDS10 = dset_10.shape[2]
     BANDS20 = dset_20.shape[2]
     BANDS60 = dset_60.shape[2]
-    label_60 = np.zeros((nr_patches, BANDS60) + PATCH_SIZE_10).astype(np.float32)
-    image_10 = np.zeros((nr_patches, BANDS10) + PATCH_SIZE_10).astype(np.float32)
-    image_20 = np.zeros((nr_patches, BANDS20) + PATCH_SIZE_20).astype(np.float32)
-    image_60 = np.zeros((nr_patches, BANDS60) + PATCH_SIZE_60).astype(np.float32)
+    label_60 = np.zeros(
+        (nr_patches, BANDS60) + (patch_size * 6, patch_size * 6)
+    ).astype(np.float32)
+    image_10 = np.zeros(
+        (nr_patches, BANDS10) + (patch_size * 6, patch_size * 6)
+    ).astype(np.float32)
+    image_20 = np.zeros(
+        (nr_patches, BANDS20) + (patch_size * 3, patch_size * 3)
+    ).astype(np.float32)
+    image_60 = np.zeros((nr_patches, BANDS60) + (patch_size, patch_size)).astype(
+        np.float32
+    )
 
     for i in range(0, nr_patches):
-        upper_left_x = randrange(0, dset_60.shape[0] - PATCH_SIZE_60[0])
-        upper_left_y = randrange(0, dset_60.shape[1] - PATCH_SIZE_60[1])
+        upper_left_x = randrange(0, dset_60.shape[0] - patch_size)
+        upper_left_y = randrange(0, dset_60.shape[1] - patch_size)
 
         label_60[i] = crop_array_to_window(
             dset_60gt,
-            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_60[0], 6),
+            get_crop_window(upper_left_x, upper_left_y, patch_size, 6),
             rollaxis=True,
         )
         image_10[i] = crop_array_to_window(
             dset_10,
-            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_60[0], 6),
+            get_crop_window(upper_left_x, upper_left_y, patch_size, 6),
             rollaxis=True,
         )
         image_20[i] = crop_array_to_window(
             dset_20,
-            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_60[0], 3),
+            get_crop_window(upper_left_x, upper_left_y, patch_size, 3),
             rollaxis=True,
         )
         image_60[i] = crop_array_to_window(
             dset_60,
-            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_60[0], 1),
+            get_crop_window(upper_left_x, upper_left_y, patch_size, 1),
             rollaxis=True,
         )
 
