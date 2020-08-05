@@ -64,11 +64,10 @@ def get_patches(
                 upper_left_j + patch_size,
             ]
             # make shape (p, c, w, h)
-            patches[patch_count] = np.rollaxis(
-                dset[crop_point[0] : crop_point[2], crop_point[1] : crop_point[3],], 2,
-            )
+            patches[patch_count] = crop_array_to_window(dset, get_crop_window(upper_left_i, upper_left_j, patch_size, 1), rollaxis=True)
             patch_count += 1
 
+    assert patch_count == nr_patches == patches.shape[0]
     return patches
 
 
@@ -223,41 +222,26 @@ def get_random_patches(dset_20gt, dset_10, dset_20, nr_patches):
     image_20 = np.zeros((nr_patches, BANDS20) + PATCH_SIZE_LR).astype(np.float32)
     image_10 = np.zeros((nr_patches, BANDS10) + PATCH_SIZE_HR).astype(np.float32)
 
-    # print(label_20.shape)
-    # print(image_20.shape)
-    # print(image_10.shape)
-
-    i = 0
-    for _ in range(0, nr_patches):
+    for i in range(0, nr_patches):
         # while True:
         upper_left_x = randrange(0, dset_20.shape[0] - PATCH_SIZE_LR[0])
         upper_left_y = randrange(0, dset_20.shape[1] - PATCH_SIZE_LR[1])
-        crop_point_lr = [
-            upper_left_x,
-            upper_left_y,
-            upper_left_x + PATCH_SIZE_LR[0],
-            upper_left_y + PATCH_SIZE_LR[1],
-        ]
-        crop_point_hr = [p * 2 for p in crop_point_lr]
-        label_20[i] = np.rollaxis(
-            dset_20gt[
-                crop_point_hr[0] : crop_point_hr[2], crop_point_hr[1] : crop_point_hr[3]
-            ],
-            2,
+
+        label_20[i] = crop_array_to_window(
+            dset_20gt,
+            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_LR[0], 2),
+            rollaxis=True,
         )
-        image_20[i] = np.rollaxis(
-            dset_20[
-                crop_point_lr[0] : crop_point_lr[2], crop_point_lr[1] : crop_point_lr[3]
-            ],
-            2,
+        image_20[i] = crop_array_to_window(
+            dset_20,
+            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_LR[0]),
+            rollaxis=True,
         )
-        image_10[i] = np.rollaxis(
-            dset_10[
-                crop_point_hr[0] : crop_point_hr[2], crop_point_hr[1] : crop_point_hr[3]
-            ],
-            2,
+        image_10[i] = crop_array_to_window(
+            dset_10,
+            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_LR[0], 2),
+            rollaxis=True,
         )
-        i += 1
 
     image_20 = interp_patches(image_20, image_10.shape)
 
@@ -277,53 +261,30 @@ def get_random_patches60(dset_60gt, dset_10, dset_20, dset_60, nr_patches):
     image_20 = np.zeros((nr_patches, BANDS20) + PATCH_SIZE_20).astype(np.float32)
     image_60 = np.zeros((nr_patches, BANDS60) + PATCH_SIZE_60).astype(np.float32)
 
-    print(label_60.shape)
-    print(image_10.shape)
-    print(image_20.shape)
-    print(image_60.shape)
-
-    i = 0
-    for _ in range(0, nr_patches):
-        # while True:
+    for i in range(0, nr_patches):
         upper_left_x = randrange(0, dset_60.shape[0] - PATCH_SIZE_60[0])
         upper_left_y = randrange(0, dset_60.shape[1] - PATCH_SIZE_60[1])
-        crop_point_lr = [
-            upper_left_x,
-            upper_left_y,
-            upper_left_x + PATCH_SIZE_60[0],
-            upper_left_y + PATCH_SIZE_60[1],
-        ]
-        crop_point_hr20 = [p * 3 for p in crop_point_lr]
-        crop_point_hr60 = [p * 6 for p in crop_point_lr]
 
-        label_60[i] = np.rollaxis(
-            dset_60gt[
-                crop_point_hr60[0] : crop_point_hr60[2],
-                crop_point_hr60[1] : crop_point_hr60[3],
-            ],
-            2,
+        label_60[i] = crop_array_to_window(
+            dset_60gt,
+            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_60[0], 6),
+            rollaxis=True,
         )
-        image_10[i] = np.rollaxis(
-            dset_10[
-                crop_point_hr60[0] : crop_point_hr60[2],
-                crop_point_hr60[1] : crop_point_hr60[3],
-            ],
-            2,
+        image_10[i] = crop_array_to_window(
+            dset_10,
+            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_60[0], 6),
+            rollaxis=True,
         )
-        image_20[i] = np.rollaxis(
-            dset_20[
-                crop_point_hr20[0] : crop_point_hr20[2],
-                crop_point_hr20[1] : crop_point_hr20[3],
-            ],
-            2,
+        image_20[i] = crop_array_to_window(
+            dset_20,
+            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_60[0], 3),
+            rollaxis=True,
         )
-        image_60[i] = np.rollaxis(
-            dset_60[
-                crop_point_lr[0] : crop_point_lr[2], crop_point_lr[1] : crop_point_lr[3]
-            ],
-            2,
+        image_60[i] = crop_array_to_window(
+            dset_60,
+            get_crop_window(upper_left_x, upper_left_y, PATCH_SIZE_60[0], 1),
+            rollaxis=True,
         )
-        i += 1
 
     image_20 = interp_patches(image_20, image_10.shape)
     image_60 = interp_patches(image_60, image_10.shape)
