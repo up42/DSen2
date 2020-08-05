@@ -85,6 +85,20 @@ def test_get_random_patches60(dset_10, dset_20, dset_60, scale_60):
     assert r[3].shape == (8000, 3, 96, 96)
 
 
+def test_get_crop_window():
+    w = patches.get_crop_window(100, 50, 25)
+    assert w == [100, 50, 125, 75]
+    w = patches.get_crop_window(100, 50, 25, 2)
+    assert w == [200, 100, 250, 150]
+
+
+def test_crop_array_to_window():
+    ar = np.ones(shape=(100, 100, 4))
+    w = patches.get_crop_window(50, 50, 25)
+    assert patches.crop_array_to_window(ar, w).shape == (4, 25, 25)
+    assert patches.crop_array_to_window(ar, w, False).shape == (25, 25, 4)
+
+
 @pytest.mark.skip(reason="too long test")
 def test_save_random_patches(dset_10, dset_20, scale_20):
     with tempfile.TemporaryDirectory() as tmpdir:

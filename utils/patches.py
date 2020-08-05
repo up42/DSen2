@@ -5,6 +5,8 @@ import json
 from math import ceil
 from random import randrange
 
+from typing import List
+
 import numpy as np
 from skimage.transform import resize
 import skimage.measure
@@ -184,6 +186,31 @@ def save_test_patches60(
     np.save(file + "data20", data20_interp)
     np.save(file + "data60", data60_interp)
     print("Done!")
+
+
+def get_crop_window(
+    upper_left_x: int, upper_left_y: int, patch_size: int, scale: int = 1
+) -> List[int]:
+    crop_window = [
+        upper_left_x,
+        upper_left_y,
+        upper_left_x + patch_size,
+        upper_left_y + patch_size,
+    ]
+    crop_window = [p * scale for p in crop_window]
+    return crop_window
+
+
+def crop_array_to_window(
+    array: np.ndarray, crop_window: List[int], rollaxis: bool = True
+) -> np.ndarray:
+    cropped_array = array[
+        crop_window[0] : crop_window[2], crop_window[1] : crop_window[3]
+    ]
+    if rollaxis:
+        return np.rollaxis(cropped_array, 2,)
+    else:
+        return cropped_array
 
 
 def get_random_patches(dset_20gt, dset_10, dset_20, nr_patches):
