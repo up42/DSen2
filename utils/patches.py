@@ -59,12 +59,6 @@ def get_patches(
         for jj in range_j.astype(int):
             upper_left_i = ii
             upper_left_j = jj
-            crop_point = [
-                upper_left_i,
-                upper_left_j,
-                upper_left_i + patch_size,
-                upper_left_j + patch_size,
-            ]
             # make shape (p, c, w, h)
             patches[patch_count] = crop_array_to_window(
                 dset,
