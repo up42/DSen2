@@ -291,4 +291,4 @@ class DATA_UTILS:
             LOGGER.error(
                 "AOI too small. Try again with a larger AOI (minimum pixel width or heigh of 192)"
             )
-            # sys.exit(1)
+            sys.exit(1)
