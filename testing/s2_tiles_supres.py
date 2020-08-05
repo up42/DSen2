@@ -66,6 +66,7 @@ class Superresolution(DATA_UTILS):
 
         super().__init__(data_file_path)
 
+    # pylint: disable=attribute-defined-outside-init
     def start(self):
         data_list = self.get_data()
 
@@ -91,9 +92,11 @@ class Superresolution(DATA_UTILS):
         for dsdesc in data_list:
             if "10m" in dsdesc:
                 LOGGER.info("Selected 10m bands:")
-                self.validated_10m_bands, validated_10m_indices, dic_10m = self.validate(
-                    dsdesc
-                )
+                (
+                    self.validated_10m_bands,
+                    validated_10m_indices,
+                    dic_10m,
+                ) = self.validate(dsdesc)
                 data10 = self.data_final(
                     dsdesc, validated_10m_indices, xmin, ymin, xmax, ymax, 1
                 )
@@ -102,9 +105,11 @@ class Superresolution(DATA_UTILS):
 
             if "20m" in dsdesc:
                 LOGGER.info("Selected 20m bands:")
-                self.validated_20m_bands, validated_20m_indices, dic_20m = self.validate(
-                    dsdesc
-                )
+                (
+                    self.validated_20m_bands,
+                    validated_20m_indices,
+                    dic_20m,
+                ) = self.validate(dsdesc)
                 data20 = self.data_final(
                     dsdesc,
                     validated_20m_indices,
@@ -116,9 +121,11 @@ class Superresolution(DATA_UTILS):
                 )
             if "60m" in dsdesc:
                 LOGGER.info("Selected 60m bands:")
-                self.validated_60m_bands, validated_60m_indices, dic_60m = self.validate(
-                    dsdesc
-                )
+                (
+                    self.validated_60m_bands,
+                    validated_60m_indices,
+                    dic_60m,
+                ) = self.validate(dsdesc)
                 data60 = self.data_final(
                     dsdesc,
                     validated_60m_indices,
@@ -134,7 +141,11 @@ class Superresolution(DATA_UTILS):
 
     def inference(self, data10, data20, data60, coord, pr_10m):
 
-        if self.validated_60m_bands and self.validated_20m_bands and self.validated_10m_bands:
+        if (
+            self.validated_60m_bands
+            and self.validated_20m_bands
+            and self.validated_10m_bands
+        ):
             LOGGER.info("Super-resolving the 60m data into 10m bands")
             sr60 = dsen2_60(data10, data20, data60, deep=False)
             LOGGER.info("Super-resolving the 20m data into 10m bands")
@@ -146,11 +157,15 @@ class Superresolution(DATA_UTILS):
         if self.copy_original_bands:
             sr_final = np.concatenate((data10, sr20, sr60), axis=2)
             validated_sr_final_bands = (
-                self.validated_10m_bands + self.validated_20m_bands + self.validated_60m_bands
+                self.validated_10m_bands
+                + self.validated_20m_bands
+                + self.validated_60m_bands
             )
         else:
             sr_final = np.concatenate((sr20, sr60), axis=2)
-            validated_sr_final_bands = self.validated_20m_bands + self.validated_60m_bands
+            validated_sr_final_bands = (
+                self.validated_20m_bands + self.validated_60m_bands
+            )
 
         pr_10m_updated = update(pr_10m, data10.shape, sr_final, coord[0], coord[1])
 

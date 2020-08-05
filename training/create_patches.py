@@ -114,7 +114,7 @@ class readS2fromFile(DATA_UTILS):
         else:
             scale = 2
 
-        #self.name = self.data_name.split(".")[0]
+        # self.name = self.data_name.split(".")[0]
 
         data10, data20, data60, xmin, ymin, xmax, ymax = self.get_original_image()
 
@@ -198,7 +198,9 @@ class readS2fromFile(DATA_UTILS):
                 out_per_image + "no_tiling/" + "data20_gt", data20.astype(np.float32)
             )
             self.save_band(
-                self.save_prefix, data10_lr[:, :, 0:3], "/test/" + self.data_name + "/RGB",
+                self.save_prefix,
+                data10_lr[:, :, 0:3],
+                "/test/" + self.data_name + "/RGB",
             )
         np.save(out_per_image + "no_tiling/" + "data10", data10_lr.astype(np.float32))
         np.save(out_per_image + "no_tiling/" + "data20", data20_lr.astype(np.float32))
@@ -209,10 +211,14 @@ class readS2fromFile(DATA_UTILS):
         data10_lr, data20_lr = self.get_downsampled_images(data10, data20, data60)
         LOGGER.info("Creating RGB images...")
         self.save_band(
-            self.save_prefix, data10_lr[:, :, 0:3], "/raw/rgbs/" + self.data_name + "RGB",
+            self.save_prefix,
+            data10_lr[:, :, 0:3],
+            "/raw/rgbs/" + self.data_name + "RGB",
         )
         self.save_band(
-            self.save_prefix, data20_lr[:, :, 0:3], "/raw/rgbs/" + self.data_name + "RGB20",
+            self.save_prefix,
+            data20_lr[:, :, 0:3],
+            "/raw/rgbs/" + self.data_name + "RGB20",
         )
 
     def saving_true_data(self, data10, data20, data60):
