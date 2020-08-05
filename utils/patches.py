@@ -111,104 +111,40 @@ def get_test_patches60(
     dset_10, dset_20, dset_60, patchSize=192, border=12, interp=True
 ):
 
-    PATCH_SIZE_10 = (patchSize, patchSize)
-    PATCH_SIZE_20 = [p // 2 for p in PATCH_SIZE_10]
-    PATCH_SIZE_60 = [p // 6 for p in PATCH_SIZE_10]
-    BORDER_10 = border
-    BORDER_20 = BORDER_10 // 2
-    BORDER_60 = BORDER_10 // 6
+    patch_size_20 = patchSize // 2
+    patch_size_60 = patchSize // 6
+    border_20 = border // 2
+    border_60 = border // 6
 
     # Mirror the data at the borders to have the same dimensions as the input
     dset_10 = np.pad(
-        dset_10,
-        ((BORDER_10, BORDER_10), (BORDER_10, BORDER_10), (0, 0)),
-        mode="symmetric",
+        dset_10, ((border, border), (border, border), (0, 0)), mode="symmetric",
     )
     dset_20 = np.pad(
         dset_20,
-        ((BORDER_20, BORDER_20), (BORDER_20, BORDER_20), (0, 0)),
+        ((border_20, border_20), (border_20, border_20), (0, 0)),
         mode="symmetric",
     )
     dset_60 = np.pad(
         dset_60,
-        ((BORDER_60, BORDER_60), (BORDER_60, BORDER_60), (0, 0)),
+        ((border_60, border_60), (border_60, border_60), (0, 0)),
         mode="symmetric",
     )
 
-    BANDS10 = dset_10.shape[2]
-    BANDS20 = dset_20.shape[2]
-    BANDS60 = dset_60.shape[2]
-    patchesAlongi = (dset_60.shape[0] - 2 * BORDER_60) // (
-        PATCH_SIZE_60[0] - 2 * BORDER_60
+    patchesAlongi = (dset_60.shape[0] - 2 * border_60) // (
+        patch_size_60 - 2 * border_60
     )
-    patchesAlongj = (dset_60.shape[1] - 2 * BORDER_60) // (
-        PATCH_SIZE_60[1] - 2 * BORDER_60
+    patchesAlongj = (dset_60.shape[1] - 2 * border_60) // (
+        patch_size_60 - 2 * border_60
     )
 
-    nr_patches = (patchesAlongi + 1) * (patchesAlongj + 1)
-
-    image_10 = np.zeros((nr_patches, BANDS10) + PATCH_SIZE_10).astype(np.float32)
-    image_20 = np.zeros((nr_patches, BANDS20) + tuple(PATCH_SIZE_20)).astype(np.float32)
-    image_60 = np.zeros((nr_patches, BANDS60) + tuple(PATCH_SIZE_60)).astype(np.float32)
-
-    # print(image_10.shape)
-    # print(image_20.shape)
-    # print(image_60.shape)
-
-    range_i = np.arange(
-        0, (dset_60.shape[0] - 2 * BORDER_60) // (PATCH_SIZE_60[0] - 2 * BORDER_60)
-    ) * (PATCH_SIZE_60[0] - 2 * BORDER_60)
-    range_j = np.arange(
-        0, (dset_60.shape[1] - 2 * BORDER_60) // (PATCH_SIZE_60[1] - 2 * BORDER_60)
-    ) * (PATCH_SIZE_60[1] - 2 * BORDER_60)
-
-    if not (
-        np.mod(dset_60.shape[0] - 2 * BORDER_60, PATCH_SIZE_60[0] - 2 * BORDER_60) == 0
-    ):
-        range_i = np.append(range_i, (dset_60.shape[0] - PATCH_SIZE_60[0]))
-    if not (
-        np.mod(dset_60.shape[1] - 2 * BORDER_60, PATCH_SIZE_60[1] - 2 * BORDER_60) == 0
-    ):
-        range_j = np.append(range_j, (dset_60.shape[1] - PATCH_SIZE_60[1]))
-
-    # print(range_i)
-    # print(range_j)
-
-    pCount = 0
-    for ii in range_i.astype(int):
-        for jj in range_j.astype(int):
-            upper_left_i = ii
-            upper_left_j = jj
-            crop_point_60 = [
-                upper_left_i,
-                upper_left_j,
-                upper_left_i + PATCH_SIZE_60[0],
-                upper_left_j + PATCH_SIZE_60[1],
-            ]
-            crop_point_10 = [p * 6 for p in crop_point_60]
-            crop_point_20 = [p * 3 for p in crop_point_60]
-            image_10[pCount] = np.rollaxis(
-                dset_10[
-                    crop_point_10[0] : crop_point_10[2],
-                    crop_point_10[1] : crop_point_10[3],
-                ],
-                2,
-            )
-            image_20[pCount] = np.rollaxis(
-                dset_20[
-                    crop_point_20[0] : crop_point_20[2],
-                    crop_point_20[1] : crop_point_20[3],
-                ],
-                2,
-            )
-            image_60[pCount] = np.rollaxis(
-                dset_60[
-                    crop_point_60[0] : crop_point_60[2],
-                    crop_point_60[1] : crop_point_60[3],
-                ],
-                2,
-            )
-            pCount += 1
+    image_10 = get_patches(dset_10, patchSize, border, patchesAlongi, patchesAlongj)
+    image_20 = get_patches(
+        dset_20, patch_size_20, border_20, patchesAlongi, patchesAlongj
+    )
+    image_60 = get_patches(
+        dset_60, patch_size_60, border_60, patchesAlongi, patchesAlongj
+    )
 
     image_10_shape = image_10.shape
 
