@@ -394,7 +394,10 @@ def save_random_patches60(
     print("Done!")
 
 
-def splitTrainVal(train_path, train, label):
+def splitTrainVal(
+    train_path: str, train: List[np.ndarray], label: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Create test validation split from val_index.npy file generated from create_validation_set."""
     # val_ind is numpy array
     # pylint: disable=invalid-unary-operand-type
     try:
@@ -412,45 +415,43 @@ def splitTrainVal(train_path, train, label):
     return train, label, val_tr, val_lb
 
 
-def OpenDataFiles(path, run_60, SCALE):
+def OpenDataFiles(
+    path: str, run_60: bool, SCALE: int
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """From path with train patches, return numpy array with train and val patches."""
     if run_60:
         train_path = path + "train60/"
     else:
         train_path = path + "train/"
-    # Initialize in able to concatenate
-    data20_gt = data60_gt = data10 = data20 = data60 = None
-    # train = label = None
+
     # Create list from path
     fileList = [os.path.basename(x) for x in sorted(glob.glob(train_path + "*SAFE"))]
-    for dset in fileList:
-        data10_new = np.load(train_path + dset + "/data10.npy")
-        data20_new = np.load(train_path + dset + "/data20.npy")
-        data10 = (
-            np.concatenate((data10, data10_new)) if data10 is not None else data10_new
-        )
-        data20 = (
-            np.concatenate((data20, data20_new)) if data20 is not None else data20_new
-        )
-        if run_60:
-            data60_gt_new = np.load(train_path + dset + "/data60_gt.npy")
-            data60_new = np.load(train_path + dset + "/data60.npy")
-            data60_gt = (
-                np.concatenate((data60_gt, data60_gt_new))
-                if data60_gt is not None
-                else data60_gt_new
-            )
-            data60 = (
-                np.concatenate((data60, data60_new))
-                if data60 is not None
-                else data60_new
-            )
+    for i, dset in enumerate(fileList):
+        if i == 0:
+            data10 = np.load(train_path + dset + "/data10.npy")
+            data20 = np.load(train_path + dset + "/data20.npy")
         else:
-            data20_gt_new = np.load(train_path + dset + "/data20_gt.npy")
-            data20_gt = (
-                np.concatenate((data20_gt, data20_gt_new))
-                if data20_gt is not None
-                else data20_gt_new
-            )
+            data10_new = np.load(train_path + dset + "/data10.npy")
+            data20_new = np.load(train_path + dset + "/data20.npy")
+            data10 = np.concatenate((data10, data10_new))
+            data20 = np.concatenate((data20, data20_new))
+
+        if run_60:
+            if i == 0:
+                data60_gt = np.load(train_path + dset + "/data60_gt.npy")
+                data60 = np.load(train_path + dset + "/data60.npy")
+            else:
+                data60_gt_new = np.load(train_path + dset + "/data60_gt.npy")
+                data60_new = np.load(train_path + dset + "/data60.npy")
+                data60_gt = np.concatenate((data60_gt, data60_gt_new))
+                data60 = np.concatenate((data60, data60_new))
+
+        else:
+            if i == 0:
+                data20_gt = np.load(train_path + dset + "/data20_gt.npy")
+            else:
+                data20_gt_new = np.load(train_path + dset + "/data20_gt.npy")
+                data20_gt = np.concatenate((data20_gt, data20_gt_new))
 
     if SCALE:
         data10 /= SCALE
@@ -467,7 +468,10 @@ def OpenDataFiles(path, run_60, SCALE):
         return splitTrainVal(train_path, [data10, data20], data20_gt)
 
 
-def OpenDataFilesTest(path, run_60, SCALE, true_scale=False):
+def OpenDataFilesTest(
+    path: str, run_60: bool, SCALE: int, true_scale: bool = False
+) -> Tuple[np.ndarray, np.ndarray]:
+    """From path with patches, return numpy array with patcches used for inference."""
     if not SCALE:
         SCALE = 1
 
@@ -493,7 +497,8 @@ def OpenDataFilesTest(path, run_60, SCALE, true_scale=False):
     return train, image_size
 
 
-def downPixelAggr(img, SCALE=2):
+def downPixelAggr(img: np.ndarray, SCALE: int = 2) -> np.ndarray:
+    """Down-scale array by scale factor. Applu gaussian blur and block reduce. """
     if len(img.shape) == 2:
         img = np.expand_dims(img, axis=-1)
     img_blur = np.zeros(img.shape)
@@ -512,7 +517,8 @@ def downPixelAggr(img, SCALE=2):
     return np.squeeze(img_lr)
 
 
-def recompose_images(a, border, size=None):
+def recompose_images(a: np.ndarray, border: int, size=None) -> np.ndarray:
+    """ From array with patches recompose original image."""
     if a.shape[0] == 1:
         images = a[0]
     else:
