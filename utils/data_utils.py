@@ -59,11 +59,9 @@ class DATA_UTILS:
         all the available resolutions.
         """
         data_folder = "MTD*.xml"
-        for file in glob.iglob(
-            os.path.join(self.data_file_path, data_folder)
-        ):
+        for file in glob.iglob(os.path.join(self.data_file_path, data_folder)):
             data_path = file
-            
+
         LOGGER.info(f"Data path is {data_path}")
 
         raster_data = rasterio.open(data_path)
