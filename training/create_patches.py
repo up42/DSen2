@@ -10,9 +10,6 @@ import numpy as np
 sys.path.append("..")
 
 from utils.data_utils import DATA_UTILS, get_logger
-
-
-sys.path.append("../")
 from utils.patches import (
     downPixelAggr,
     save_test_patches,

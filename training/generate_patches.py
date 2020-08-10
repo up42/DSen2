@@ -1,9 +1,14 @@
 import argparse
 from pathlib import Path
 
+sys.path.append("..")
+
 from create_patches import readS2fromFile
 
+from utils.data_utils import get_logger
+
 LOGGER = get_logger(__name__)
+
 
 def arg_parse():
     parser = argparse.ArgumentParser(
@@ -11,10 +16,7 @@ def arg_parse():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
-        "data_folder_path",
-        help=(
-            "Path to folder with S2 SAFE files."
-        ),
+        "data_folder_path", help=("Path to folder with S2 SAFE files."),
     )
     parser.add_argument(
         "--test_data",
@@ -67,6 +69,7 @@ def arg_parse():
     args = parser.parse_args()
     return args
 
+
 def main(args):
     LOGGER.info(
         f"I will proceed with file {args.data_folder_path}"
@@ -84,6 +87,7 @@ def main(args):
             args.test_data,
             args.train_data,
         ).process_patches()
+
 
 if __name__ == "__main__":
     main(arg_parse())
