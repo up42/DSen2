@@ -45,6 +45,7 @@ class readS2fromFile(DATA_UTILS):
         self.true_data = true_data
         self.test_data = test_data
         self.train_data = train_data
+        self.data_name = os.path.basename(data_file_path)
 
         super().__init__(data_file_path)
 
