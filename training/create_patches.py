@@ -233,9 +233,8 @@ class readS2fromFile(DATA_UTILS):
         if not os.path.isdir(out_per_image):
             os.mkdir(out_per_image)
 
-        LOGGER.info(
-            f"Writing files for testing to:{out_per_image}"
-        )  # pylint: disable=logging-fstring-interpolation
+        # pylint: disable=logging-fstring-interpolation
+        LOGGER.info(f"Writing files for testing to:{out_per_image}")
         save_test_patches60(
             data10, data20, data60, out_per_image, patchSize=384, border=12
         )
