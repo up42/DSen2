@@ -7,6 +7,8 @@ import json
 from typing import Tuple
 import numpy as np
 
+sys.path.append("..")
+
 from utils.data_utils import DATA_UTILS, get_logger
 
 
@@ -349,7 +351,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     LOGGER.info(
-        f"I will proceed with file {args.data_file}"
+        f"I will proceed with file {args.data_file_path}"
     )  # pylint: disable=logging-fstring-interpolation
     readS2fromFile(
         args.data_file_path,
