@@ -72,9 +72,8 @@ def arg_parse():
 
 
 def main(args):
-    LOGGER.info(
-        f"I will proceed with file {args.data_folder_path}"
-    )  # pylint: disable=logging-fstring-interpolation
+    # pylint: disable=logging-fstring-interpolation
+    LOGGER.info(f"I will proceed with file {args.data_folder_path}")
 
     for file_path in Path(args.data_folder_path).glob("S2*"):
         LOGGER.info(f"Processing {file_path}")
