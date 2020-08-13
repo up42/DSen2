@@ -199,7 +199,7 @@ class readS2fromFile(DATA_UTILS):
             self.save_band(
                 self.save_prefix,
                 data10_lr[:, :, 0:3],
-                "/test/" + self.data_name + "/RGB",
+                "test/" + self.data_name + "/RGB",
             )
         np.save(out_per_image + "no_tiling/" + "data10", data10_lr.astype(np.float32))
         np.save(out_per_image + "no_tiling/" + "data20", data20_lr.astype(np.float32))
