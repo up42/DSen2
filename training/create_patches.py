@@ -40,7 +40,6 @@ class readS2fromFile(DATA_UTILS):
         self.rgb_images = rgb_images
         self.run_60 = run_60
         self.true_data = true_data
-        self.test_data = test_data
         self.train_data = train_data
         self.data_name = os.path.basename(data_file_path)
 
