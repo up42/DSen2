@@ -146,9 +146,9 @@ if __name__ == "__main__":
 
     # input_shape = ((4,32,32),(6,16,16))
     if args.run_60:
-        input_shape = ((4, None, None), (6, None, None), (2, None, None))
+        input_shape = ((4, None, None), (6, None, None), (2, None, None))  # type: ignore
     else:
-        input_shape = ((4, None, None), (6, None, None))
+        input_shape = ((4, None, None), (6, None, None))  # type: ignore
     # create model
     if args.deep:
         model = s2model(input_shape, num_layers=32, feature_size=256)
