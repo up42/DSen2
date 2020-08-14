@@ -72,6 +72,7 @@ def parser_common(parser):
     return parser
 
 
+# pylint: disable=unbalanced-tuple-unpacking
 class readS2fromFile(DATA_UTILS):
     def __init__(
         self,
