@@ -21,6 +21,57 @@ from utils.patches import (
 LOGGER = get_logger(__name__)
 
 
+def parser_common(parser):
+    parser.add_argument(
+        "--test_data",
+        default=False,
+        action="store_true",
+        help="Store test patches in a separate dir.",
+    )
+    parser.add_argument(
+        "--rgb_images",
+        default=False,
+        action="store_true",
+        help=(
+            "If set, write PNG images for the original and the superresolved bands,"
+            " together with a composite rgb image (first three 10m bands), all with a "
+            "quick and dirty clipping to 99%% of the original bands dynamic range and "
+            "a quantization of the values to 256 levels."
+        ),
+    )
+    parser.add_argument(
+        "--save_prefix",
+        default="../data/",
+        help=(
+            "If set, speficies the name of a prefix for all output files. "
+            "Use a trailing / to save into a directory. The default of no prefix will "
+            "save into the current directory. Example: --save_prefix result/"
+        ),
+    )
+    parser.add_argument(
+        "--run_60",
+        default=False,
+        action="store_true",
+        help="If set, it will create patches also from the 60m channels.",
+    )
+    parser.add_argument(
+        "--true_data",
+        default=False,
+        action="store_true",
+        help=(
+            "If set, it will create patches for S2 without GT. This option is not "
+            "really useful here, please check the testing folder for predicting S2 images."
+        ),
+    )
+    parser.add_argument(
+        "--train_data",
+        default=False,
+        action="store_true",
+        help="Store train patches in a separate dir",
+    )
+    return parser
+
+
 class readS2fromFile(DATA_UTILS):
     def __init__(
         self,
@@ -288,61 +339,7 @@ if __name__ == "__main__":
             " or the S2A[...].xml file in a SAFE directory extracted from that ZIP."
         ),
     )
-    parser.add_argument(
-        "--clip_to_aoi",
-        default="",
-        help=(
-            "Sets the region of interest to extract as pixels locations on the 10m"
-            'bands. Use this syntax: x_1,y_1,x_2,y_2. E.g. --roi_x_y "2000,2000,3200,3200"'
-        ),
-    )
-    parser.add_argument(
-        "--test_data",
-        default=False,
-        action="store_true",
-        help="Store test patches in a separate dir.",
-    )
-    parser.add_argument(
-        "--rgb_images",
-        default=False,
-        action="store_true",
-        help=(
-            "If set, write PNG images for the original and the superresolved bands,"
-            " together with a composite rgb image (first three 10m bands), all with a "
-            "quick and dirty clipping to 99%% of the original bands dynamic range and "
-            "a quantization of the values to 256 levels."
-        ),
-    )
-    parser.add_argument(
-        "--save_prefix",
-        default="../data/",
-        help=(
-            "If set, speficies the name of a prefix for all output files. "
-            "Use a trailing / to save into a directory. The default of no prefix will "
-            "save into the current directory. Example: --save_prefix result/"
-        ),
-    )
-    parser.add_argument(
-        "--run_60",
-        default=False,
-        action="store_true",
-        help="If set, it will create patches also from the 60m channels.",
-    )
-    parser.add_argument(
-        "--true_data",
-        default=False,
-        action="store_true",
-        help=(
-            "If set, it will create patches for S2 without GT. This option is not "
-            "really useful here, please check the testing folder for predicting S2 images."
-        ),
-    )
-    parser.add_argument(
-        "--train_data",
-        default=False,
-        action="store_true",
-        help="Store train patches in a separate dir",
-    )
+    parser = parser_common(parser)
 
     args = parser.parse_args()
 
