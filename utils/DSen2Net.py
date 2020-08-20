@@ -39,8 +39,8 @@ def init(input_shape):
     return x, res, channels
 
 
-def aesrmodel(input_shape, n1=64, n2=32):
-    x, input, channels = init(input_shape)
+def aesrmodel(input_shape, n1=64):
+    x, _input, channels = init(input_shape)
 
     level1_1 = Conv2D(
         n1, (3, 3), data_format="channels_first", activation="relu", padding="same"
@@ -67,13 +67,13 @@ def aesrmodel(input_shape, n1=64, n2=32):
         padding="same",
     )(level1)
 
-    model = Model(inputs=input, outputs=decoded)
+    model = Model(inputs=_input, outputs=decoded)
     return model
 
 
 def s2model(input_shape, num_layers=32, feature_size=256):
 
-    x, input, _ = init(input_shape)
+    x, _input, _ = init(input_shape)
 
     # Treat the concatenation
     x = Conv2D(
@@ -97,9 +97,9 @@ def s2model(input_shape, num_layers=32, feature_size=256):
         padding="same",
     )(x)
     if len(input_shape) == 3:
-        x = Add()([x, input[2]])
-        model = Model(inputs=input, outputs=x)
+        x = Add()([x, _input[2]])
+        model = Model(inputs=_input, outputs=x)
     else:
-        x = Add()([x, input[1]])
-        model = Model(inputs=input, outputs=x)
+        x = Add()([x, _input[1]])
+        model = Model(inputs=_input, outputs=x)
     return model
