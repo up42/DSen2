@@ -5,7 +5,7 @@ import time
 import argparse
 from glob import glob
 
-# from tensorflow import keras
+from tensorflow import keras
 import numpy as np
 from keras.optimizers import Nadam
 
@@ -31,29 +31,9 @@ def write_final_dict(metric, metric_dict):
         f.writelines('{}:{}\n'.format(k, v) for k, v in metric_dict.items())
 
 
-def predict_downsampled_img(path, folder, dset, border, final_name):
+def predict_downsampled_img(path, model_path, folder, dset, border, final_name):
 
-    logger.info("Loading weight ...")
-    if args.run_60:
-        input_shape = ((4, None, None), (6, None, None), (2, None, None))  # type: ignore
-    else:
-        input_shape = ((4, None, None), (6, None, None))  # type: ignore
-        # create model
-    model = s2model(input_shape, num_layers=6, feature_size=128)
-    print("Symbolic Model Created.")
-
-    nadam = Nadam(
-        lr=lr, beta_1=0.9, beta_2=0.999, epsilon=1e-8, schedule_decay=0.004
-    )
-
-    model.compile(
-        optimizer=nadam, loss="mean_absolute_error", metrics=["mean_squared_error"]
-    )
-    print("Model compiled.")
-    model.count_params()
-
-    # model = keras.models.load_model(MODEL_PATH +"s2_030_lr_1e-05.hdf5")
-    model.load_weights(MODEL_PATH +"s2_032_lr_1e-04.hdf5")
+    model = keras.models.load_model(model_path)
 
     start = time.time()
     print("Timer started.")
@@ -81,7 +61,7 @@ def evaluation(org_img, pred_img, metric):
     return result
 
 
-def process(path, metric):
+def process(path, model_path, metric):
     if args.l1c:
         prefix = "l1c"
     if args.l2a:
@@ -112,7 +92,7 @@ def process(path, metric):
             org_img_path = os.path.join(path_to_patches, dset + "/no_tiling/data20_gt.npy")
             pred_img_path = os.path.join(path_to_patches, dset + "/no_tiling/data20_predicted.npy")
 
-        predict_downsampled_img(path, folder, dset, border, final_name)
+        predict_downsampled_img(path, model_path, folder, dset, border, final_name)
         eval_value = evaluation(org_img_path, pred_img_path, metric)
         gt_sr.append(eval_value)
     metric_dict["GT_SR"] = sum(gt_sr) / len(gt_sr)
@@ -123,10 +103,11 @@ def process(path, metric):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Evaluates an Image Super Resolution Model")
-    parser.add_argument("--path", type=str, help="Path to ")
-    parser.add_argument("--l1c", action="store_true", help="getting L1C samples")
-    parser.add_argument("--l2a", action="store_true", help="getting L2A samples")
-    parser.add_argument("--metric", type=str, default="psnr", help="use psnr, uiq, sam or sre as evaluation metric")
+    parser.add_argument("--path", type=str, help="Path to image for evaluation")
+    parser.add_argument("--model_path", type=str, help="Path to model weights")
+    parser.add_argument("--l1c", action="store_true", help="Getting L1C samples")
+    parser.add_argument("--l2a", action="store_true", help="Getting L2A samples")
+    parser.add_argument("--metric", type=str, default="psnr", help="Use psnr, uiq, sam or sre as evaluation metric")
     parser.add_argument(
         "--run_60",
         action="store_true",
@@ -135,7 +116,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     path = args.path
+    model_path = args.model_path
     metric = args.metric
 
-    process(path, metric)
+    process(path, model_path, metric)
 
