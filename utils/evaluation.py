@@ -16,7 +16,6 @@ from patches import recompose_images, OpenDataFilesTest, OpenDataFiles
 logger = get_logger(__name__)
 
 SCALE = 2000
-lr = 1e-4
 MODEL_PATH = "../models/"
 
 
