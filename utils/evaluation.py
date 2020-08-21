@@ -43,8 +43,6 @@ def predict_downsampled_img(path, model_path, folder, dset, border, final_name):
     prediction = model.predict(train, batch_size=8, verbose=1)
 
     images = recompose_images(prediction, border=border, size=image_size)
-    import pdb;
-    pdb.set_trace()
     print("Writing to file...")
     np.save(os.path.join(path, folder + dset + "/no_tiling/" + final_name), images * SCALE)
     end = time.time()
