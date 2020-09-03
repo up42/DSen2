@@ -60,16 +60,15 @@ def predict_downsampled_img(path, model_path, folder, dset, border, final_name):
 
 
 def evaluation(org_img, pred_img, metric):
+    import skimage.transform
     org_img_array = np.load(org_img)
     pred_img_array = np.load(pred_img)
+    print("eval %d %d %d" % pred_img_array.shape)
+    if bic:
+        pred_img_array = skimage.transform.resize(org_img_array,org_img_array.shape)
 
-    org_img_shape = org_img_array[:, :, :].shape
-    pred_img_shape = pred_img_array[:, :, :].shape
-    if org_img_shape != pred_img_shape:
-        pred_img_array = pred_img_array[: org_img_shape[0], : org_img_shape[1]]
-
-    result = eval(f"{metric}(org_img_array, pred_img_array)")
-    return result
+    print("eval %d %d %d" % org_img_array.shape)
+    print("eval %d %d %d" % pred_img_array.shape)
 
 
 def process(path, model_path, metric):
@@ -98,15 +97,22 @@ def process(path, model_path, metric):
     for dset in fileList:
         if args.run_60:
             org_img_path = os.path.join(path_to_patches, dset + "/no_tiling/data60_gt.npy")
+            bic_img_path = os.path.join(path_to_patches, dset + "/no_tiling/data60.npy")
             pred_img_path = os.path.join(path_to_patches, dset +  "/no_tiling/data60_predicted.npy")
         else:
             org_img_path = os.path.join(path_to_patches, dset + "/no_tiling/data20_gt.npy")
+            bic_img_path = os.path.join(path_to_patches, dset + "/no_tiling/data20.npy")
             pred_img_path = os.path.join(path_to_patches, dset + "/no_tiling/data20_predicted.npy")
 
-        predict_downsampled_img(path, model_path, folder, dset, border, final_name)
+
+        predict_downsampled_img(path, model_path, folder, dset, border, pred_img_path)
+        print(org_img_path, bic_img_path, pred_img_path)
         eval_value = evaluation(org_img_path, pred_img_path, metric)
+        eval_value_bic = evaluation(org_img_path, bic_img_path, metric, bic=True)
         metric_dict[dset] = eval_value
         mean_eval_value.append(eval_value)
+        print(f"NN: {eval_value}")
+        print(f"Bicubic: {eval_value_bic}")
 
     metric_dict["mean"] = sum(mean_eval_value) / len(mean_eval_value)
 
@@ -133,4 +139,3 @@ if __name__ == "__main__":
     metric = args.metric
 
     process(path, model_path, metric)
-
