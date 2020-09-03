@@ -86,9 +86,9 @@ def evaluation(org_img, pred_img, metric, bic=False):
     if org_img_shape != pred_img_shape:
         pred_img_array = pred_img_array[: org_img_shape[0], : org_img_shape[1]]
 
-    result = eval(
-        f"{metric}(org_img_array, pred_img_array)"
-    )  # pylint: disable=eval-used
+    # Fo usage of eval
+    # pylint: disable=eval-used
+    result = eval(f"{metric}(org_img_array, pred_img_array)")
     return result
 
 
