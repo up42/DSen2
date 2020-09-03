@@ -112,14 +112,7 @@ class Superresolution(DATA_UTILS):
                     dic_20m,
                 ) = self.validate(dsdesc)
                 data20 = self.data_final(
-                    dsdesc,
-                    validated_20m_indices,
-                    xmin,
-                    ymin,
-                    xmax,
-                    ymax,
-                    1,
-                    2,
+                    dsdesc, validated_20m_indices, xmin, ymin, xmax, ymax, 1, 2,
                 )
             if "60m" in dsdesc:
                 LOGGER.info("Selected 60m bands:")
@@ -129,14 +122,7 @@ class Superresolution(DATA_UTILS):
                     dic_60m,
                 ) = self.validate(dsdesc)
                 data60 = self.data_final(
-                    dsdesc,
-                    validated_60m_indices,
-                    xmin,
-                    ymin,
-                    xmax,
-                    ymax,
-                    1,
-                    6,
+                    dsdesc, validated_60m_indices, xmin, ymin, xmax, ymax, 1, 6,
                 )
 
         self.validated_descriptions_all = {**dic_10m, **dic_20m, **dic_60m}
