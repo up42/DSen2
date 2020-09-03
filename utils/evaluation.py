@@ -59,7 +59,7 @@ def predict_downsampled_img(path, model_path, folder, dset, border, final_name):
     logger.info(f"Elapsed time: {end - start}.")
 
 
-def evaluation(org_img, pred_img, metric):
+def evaluation(org_img, pred_img, metric, bic=False):
     import skimage.transform
     org_img_array = np.load(org_img)
     pred_img_array = np.load(pred_img)
@@ -108,11 +108,12 @@ def process(path, model_path, metric):
         predict_downsampled_img(path, model_path, folder, dset, border, pred_img_path)
         print(org_img_path, bic_img_path, pred_img_path)
         eval_value = evaluation(org_img_path, pred_img_path, metric)
-        eval_value_bic = evaluation(org_img_path, bic_img_path, metric, bic=True)
+        if args.bic:
+            eval_value_bic = evaluation(org_img_path, bic_img_path, metric, bic=True)
+            print(f"Bicubic: {eval_value_bic}")
         metric_dict[dset] = eval_value
         mean_eval_value.append(eval_value)
         print(f"NN: {eval_value}")
-        print(f"Bicubic: {eval_value_bic}")
 
     metric_dict["mean"] = sum(mean_eval_value) / len(mean_eval_value)
 
@@ -126,6 +127,7 @@ if __name__ == "__main__":
     parser.add_argument("--model_path", type=str, help="Path to model weights")
     parser.add_argument("--l1c", action="store_true", help="Getting L1C samples")
     parser.add_argument("--l2a", action="store_true", help="Getting L2A samples")
+    parser.add_argument("--bic", action="store_true", help="Compare bicubic result")
     parser.add_argument("--metric", type=str, default="psnr", help="Use psnr, uiq, sam or sre as evaluation metric")
     parser.add_argument(
         "--run_60",
