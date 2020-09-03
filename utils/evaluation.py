@@ -8,7 +8,7 @@ from glob import glob
 from tensorflow import keras
 import numpy as np
 
-from image_similarity_measures.quality_metrics import psnr, uiq, sam, sre, ssim
+from image_similarity_measures.quality_metrics import psnr, uiq, sam, sre, ssim, issm, fsim
 
 from data_utils import get_logger
 from patches import recompose_images, OpenDataFilesTest, OpenDataFiles
