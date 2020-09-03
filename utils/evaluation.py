@@ -69,6 +69,13 @@ def evaluation(org_img, pred_img, metric, bic=False):
 
     print("eval %d %d %d" % org_img_array.shape)
     print("eval %d %d %d" % pred_img_array.shape)
+    org_img_shape = org_img_array[:, :, :].shape
+    pred_img_shape = pred_img_array[:, :, :].shape
+    if org_img_shape != pred_img_shape:
+        pred_img_array = pred_img_array[: org_img_shape[0], : org_img_shape[1]]
+
+    result = eval(f"{metric}(org_img_array, pred_img_array)")
+    return result
 
 
 def process(path, model_path, metric):
