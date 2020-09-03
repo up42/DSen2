@@ -41,7 +41,7 @@ def test_start(fixture_superresolution_clip, monkeypatch):
     ) = fixture_superresolution_clip.start()
     assert data10.shape == (444, 456, 4)
     assert data20.shape == (222, 228, 6)
-    assert data60.shape == (73, 75, 2)
+    assert data60.shape == (74, 76, 2)
     assert [xmin, ymin, xmax, ymax] == [48, 174, 503, 617]
     assert pr == {
         "driver": "GTiff",
