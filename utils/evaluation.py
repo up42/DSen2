@@ -7,11 +7,22 @@ from glob import glob
 
 from tensorflow import keras
 import numpy as np
+import skimage.transform
 
-from image_similarity_measures.quality_metrics import psnr, uiq, sam, sre, ssim, issm, fsim
+# For usage of eval in evaluation
+# pylint: disable=unused-import
+from image_similarity_measures.quality_metrics import (
+    psnr,
+    uiq,
+    sam,
+    sre,
+    ssim,
+    issm,
+    fsim,
+)
 
 from data_utils import get_logger
-from patches import recompose_images, OpenDataFilesTest, OpenDataFiles
+from patches import recompose_images, OpenDataFilesTest
 
 logger = get_logger(__name__)
 
@@ -19,7 +30,7 @@ SCALE = 2000
 MODEL_PATH = "../models/"
 
 
-def rmse(org_img: np.ndarray, pred_img: np.ndarray, data_range=10000):
+def rmse(org_img: np.ndarray, pred_img: np.ndarray):
     """
     Root Mean Squared Error
     """
@@ -62,8 +73,6 @@ def predict_downsampled_img(path, model_path, folder, dset, border, final_name):
 
 
 def evaluation(org_img, pred_img, metric, bic=False):
-    import skimage.transform
-
     org_img_array = np.load(org_img)
     pred_img_array = np.load(pred_img)
     print("eval %d %d %d" % pred_img_array.shape)
@@ -77,7 +86,9 @@ def evaluation(org_img, pred_img, metric, bic=False):
     if org_img_shape != pred_img_shape:
         pred_img_array = pred_img_array[: org_img_shape[0], : org_img_shape[1]]
 
-    result = eval(f"{metric}(org_img_array, pred_img_array)")
+    result = eval(
+        f"{metric}(org_img_array, pred_img_array)"
+    )  # pylint: disable=eval-used
     return result
 
 
@@ -89,11 +100,9 @@ def process(path, model_path, metric):
     if args.run_60:
         folder = prefix + "test60/"
         border = 12
-        final_name = "data60_predicted"
     else:
         folder = prefix + "test/"
         border = 4
-        final_name = "data20_predicted"
 
     path_to_patches = os.path.join(path, folder)
 
