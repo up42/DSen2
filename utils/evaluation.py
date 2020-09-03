@@ -8,7 +8,7 @@ from glob import glob
 from tensorflow import keras
 import numpy as np
 
-from image_similarity_measures.quality_metrics import psnr, uiq, sam, sre
+from image_similarity_measures.quality_metrics import psnr, uiq, sam, sre, ssim
 
 from data_utils import get_logger
 from patches import recompose_images, OpenDataFilesTest, OpenDataFiles
@@ -18,6 +18,16 @@ logger = get_logger(__name__)
 SCALE = 2000
 MODEL_PATH = "../models/"
 
+def rmse(org_img: np.ndarray, pred_img: np.ndarray, data_range=10000):
+    """
+    Root Mean Squared Error
+    """
+    rmse_final = []
+    for i in range(org_img.shape[2]):
+        m = np.mean(((org_img[:, :, i] - pred_img[:, :, i])) ** 2)
+        s = np.sqrt(m)
+        rmse_final.append(s)
+    return np.mean(rmse_final)
 
 def write_final_dict(metric, metric_dict):
     # Create a directory to save the text file of including evaluation values.
