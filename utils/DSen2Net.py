@@ -11,7 +11,6 @@ from keras.layers import (
     BatchNormalization,
     PReLU,
     ReLU,
-    UpSampling2D,
 )
 
 keras.backend.set_image_data_format("channels_first")
@@ -83,9 +82,8 @@ def srcnn(input_shape):
 
 def rednetsr(input_shape):
     def _build_layer_list(model):
-        model_layers = [layer for layer in model.layers]
         model_outputs = [layer.output for layer in model.layers]
-        return model_layers, model_outputs
+        return model_outputs
 
     n_conv_layers = 15
     n_deconv_layers = 15
@@ -104,7 +102,7 @@ def rednetsr(input_shape):
     encoded = conv
     encoder = Model(inputs=_input, outputs=encoded, name="encoder")
     # Create encoder layer and output lists
-    encoder_layers, encoder_outputs = _build_layer_list(encoder)
+    encoder_outputs = _build_layer_list(encoder)
 
     # CREATE AUTOENCODER MODEL
     for i, skip in enumerate(reversed(encoder_outputs[len(_input) + 1 :])):
@@ -133,13 +131,13 @@ def rednetsr(input_shape):
 
 
 def resnetsr(input_shape):
-    def _residual_block(ip, id):
+    def _residual_block(ip, _id):
         channel_axis = 1  # channels first
         init = ip
 
-        x = Conv2D(n, (3, 3), padding="same", name="sr_res_conv_" + str(id) + "_1")(ip)
+        x = Conv2D(n, (3, 3), padding="same", name="sr_res_conv_" + str(_id) + "_1")(ip)
         x = BatchNormalization(
-            momentum=0.5, axis=channel_axis, name="sr_res_batchnorm_" + str(id) + "_1"
+            momentum=0.5, axis=channel_axis, name="sr_res_batchnorm_" + str(_id) + "_1"
         )(x)
         x = PReLU(
             alpha_initializer="zeros",
@@ -147,32 +145,16 @@ def resnetsr(input_shape):
             alpha_constraint=None,
             shared_axes=[2, 3],
         )(x)
-        x = Conv2D(n, (3, 3), padding="same", name="sr_res_conv_" + str(id) + "_2")(x)
+        x = Conv2D(n, (3, 3), padding="same", name="sr_res_conv_" + str(_id) + "_2")(x)
         x = BatchNormalization(
-            momentum=0.5, axis=channel_axis, name="sr_res_batchnorm_" + str(id) + "_2"
+            momentum=0.5, axis=channel_axis, name="sr_res_batchnorm_" + str(_id) + "_2"
         )(x)
 
-        m = Add(name="sr_res_merge_" + str(id))([x, init])
+        m = Add(name="sr_res_merge_" + str(_id))([x, init])
         return m
-
-    """
-    Remove upsampling block to allow for pansharpening
-    def _upscale_block(ip, id, n, scale_factor=2):
-        init = ip
-
-        x = UpSampling2D(size=(scale_factor, scale_factor))(init)
-        x = Conv2D(
-            n, (3, 3), activation="relu", padding="same", name="sr_res_filter1_%d" % id
-        )(x)
-        return x
-    """
 
     n = 64
     x, _input, channels = init(input_shape)
-    if channels == 6:
-        scale_factor = 2
-    elif channels == 2:
-        scale_factor = 6
 
     x0 = Conv2D(n, (9, 9), padding="same", name="sr_res_conv1")(x)
     x0 = PReLU(
@@ -190,9 +172,6 @@ def resnetsr(input_shape):
     x0 = Conv2D(filters=n, kernel_size=3, strides=1, padding="same")(x0)
     x0 = BatchNormalization(axis=1, momentum=0.5)(x0)
     x0 = Add()([x, x0])
-
-    # for i in range(2):
-    #    x0 = _upscale_block(x0, i, n, scale_factor)
 
     x0 = Conv2D(channels, (9, 9), padding="same", name="sr_res_conv_final")(x0)
     x0 = Activation("tanh")(x0)
