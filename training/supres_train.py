@@ -20,7 +20,7 @@ import keras.backend as K
 
 sys.path.append("../")
 from utils.patches import recompose_images, OpenDataFilesTest, OpenDataFiles
-from utils.DSen2Net import s2model, aesrmodel
+from utils.DSen2Net import s2model, aesrmodel, srcnn, rednetsr, resnetsr
 
 # Define file prefix for new training, must be 7 characters of this form:
 model_nr = "s2_038_"
