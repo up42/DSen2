@@ -9,7 +9,6 @@ from keras.layers import (
     Lambda,
     Add,
     BatchNormalization,
-    PReLU,
     ReLU,
 )
 
@@ -139,12 +138,7 @@ def resnetsr(input_shape):
         x = BatchNormalization(
             momentum=0.5, axis=channel_axis, name="sr_res_batchnorm_" + str(_id) + "_1"
         )(x)
-        x = PReLU(
-            alpha_initializer="zeros",
-            alpha_regularizer=None,
-            alpha_constraint=None,
-            shared_axes=[2, 3],
-        )(x)
+        x = ReLU()(x)
         x = Conv2D(n, (3, 3), padding="same", name="sr_res_conv_" + str(_id) + "_2")(x)
         x = BatchNormalization(
             momentum=0.5, axis=channel_axis, name="sr_res_batchnorm_" + str(_id) + "_2"
@@ -157,12 +151,7 @@ def resnetsr(input_shape):
     x, _input, channels = init(input_shape)
 
     x0 = Conv2D(n, (9, 9), padding="same", name="sr_res_conv1")(x)
-    x0 = PReLU(
-        alpha_initializer="zeros",
-        alpha_regularizer=None,
-        alpha_constraint=None,
-        shared_axes=[2, 3],
-    )(x0)
+    x0 = ReLU()(x0)
     x = x0
 
     nb_residual = 16
