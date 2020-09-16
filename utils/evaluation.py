@@ -13,7 +13,7 @@ import skimage.transform
 # pylint: disable=unused-import
 from image_similarity_measures.quality_metrics import (
     psnr,
-    uiq,
+    sliding_window,
     sam,
     sre,
     ssim,
@@ -29,6 +29,32 @@ logger = get_logger(__name__)
 SCALE = 2000
 MODEL_PATH = "../models/"
 
+def uiq(org_img: np.ndarray, pred_img: np.ndarray, win_size=1024, step=1024//2):
+    """
+    Universal Image Quality index
+    """
+    # TODO: Apply optimization, right now it is very slow
+    q_all = []
+    for (x, y, window_org), (x, y, window_pred) in zip(sliding_window(org_img, stepSize=step, windowSize=(win_size, win_size)),
+                                                       sliding_window(pred_img, stepSize=step, windowSize=(win_size, win_size))):
+        print(x, y)
+        # if the window does not meet our desired window size, ignore it
+        if window_org.shape[0] != win_size or window_org.shape[1] != win_size:
+            continue
+        org_img_mean = np.mean(org_img)
+        pred_img_mean = np.mean(pred_img)
+        org_img_variance = np.var(org_img)
+        pred_img_variance = np.var(pred_img)
+        org_pred_img_variance = np.mean((window_org - org_img_mean) * (window_pred - pred_img_mean))
+
+        numerator = 4 * org_pred_img_variance * org_img_mean * pred_img_mean
+        denominator = (org_img_variance + pred_img_variance) * (org_img_mean**2 + pred_img_mean**2)
+
+        if denominator != 0.0:
+            q = numerator / denominator
+            q_all.append(q)
+
+    return np.mean(q_all)
 
 def rmse(org_img: np.ndarray, pred_img: np.ndarray):
     """
